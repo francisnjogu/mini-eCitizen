@@ -1,0 +1,6 @@
+{
+  "name": "mini eCitizen",
+  "description": "Public Service Request System for citizens to report community issues and administrators to track and resolve them.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

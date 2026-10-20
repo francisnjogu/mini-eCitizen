@@ -1,0 +1,169 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Registered citizen or administrator account record",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the user",
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of citizen or admin",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of user",
+          "maxLength": 150
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact phone number",
+          "maxLength": 30
+        },
+        "role": {
+          "type": "string",
+          "description": "User role authorization level",
+          "enum": ["citizen", "admin"]
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp in ISO or server format"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "PublicServiceRequest": {
+      "title": "Public Service Request",
+      "description": "A community issue reported by a citizen for administrative resolution",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique request document identifier",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "UID of the citizen who filed the request",
+          "maxLength": 128
+        },
+        "userName": {
+          "type": "string",
+          "description": "Name of citizen submitter",
+          "maxLength": 100
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "Contact email of citizen submitter",
+          "maxLength": 150
+        },
+        "category": {
+          "type": "string",
+          "description": "Issue category classification",
+          "enum": [
+            "Broken Streetlight",
+            "Water & Sewage",
+            "Garbage Collection",
+            "Road Pothole",
+            "Public Health",
+            "Parks & Green Spaces",
+            "Other"
+          ]
+        },
+        "location": {
+          "type": "string",
+          "description": "Physical address, landmark or GPS coordinates of issue",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed explanation of community issue",
+          "minLength": 5,
+          "maxLength": 2000
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Optional image URL stored in Firebase Storage or base64",
+          "maxLength": 2000000
+        },
+        "imageBase64": {
+          "type": "string",
+          "description": "Optional compressed Base64 encoded image string stored directly in Firestore",
+          "maxLength": 1000000
+        },
+        "status": {
+          "type": "string",
+          "description": "Current lifecycle status of the report",
+          "enum": ["Pending", "In Progress", "Resolved"]
+        },
+        "adminNote": {
+          "type": "string",
+          "description": "Resolution feedback or note from administrator",
+          "maxLength": 1000
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when service request was logged"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when request or status was last updated"
+        }
+      },
+      "required": ["userId", "category", "location", "description", "status"]
+    },
+    "AdminRecord": {
+      "title": "Admin Registry Document",
+      "description": "Designation document marking a user UID as an administrator",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Admin UID",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "description": "Admin user email",
+          "maxLength": 150
+        },
+        "addedAt": {
+          "type": "string",
+          "description": "Date admin privilege granted"
+        }
+      },
+      "required": ["uid"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Profile data for each registered citizen or administrator"
+    },
+    "/requests/{requestId}": {
+      "schema": {
+        "$ref": "#/entities/PublicServiceRequest"
+      },
+      "description": "Community service requests logged by citizens and updated by administrators"
+    },
+    "/admins/{adminId}": {
+      "schema": {
+        "$ref": "#/entities/AdminRecord"
+      },
+      "description": "Trusted collection of admin user IDs"
+    }
+  }
+}

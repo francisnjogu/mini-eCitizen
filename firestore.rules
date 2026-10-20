@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default-deny global safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == "francisnjogu157@gmail.com" ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'name', 'email', 'role']) &&
+        data.keys().hasOnly(['uid', 'name', 'email', 'phone', 'role', 'createdAt', 'updatedAt']) &&
+        data.uid is string && data.uid.size() <= 128 &&
+        data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
+        data.email is string && data.email.size() <= 150 &&
+        data.role in ['citizen', 'admin'] &&
+        (!('phone' in data) || (data.phone is string && data.phone.size() <= 30));
+    }
+
+    function isValidRequest(data) {
+      return data.keys().hasAll(['userId', 'category', 'location', 'description', 'status']) &&
+        data.keys().hasOnly(['id', 'userId', 'userName', 'userEmail', 'category', 'location', 'description', 'imageUrl', 'imageBase64', 'status', 'adminNote', 'createdAt', 'updatedAt']) &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.category in ['Broken Streetlight', 'Water & Sewage', 'Garbage Collection', 'Road Pothole', 'Public Health', 'Parks & Green Spaces', 'Other'] &&
+        data.location is string && data.location.size() >= 3 && data.location.size() <= 200 &&
+        data.description is string && data.description.size() >= 5 && data.description.size() <= 2000 &&
+        data.status in ['Pending', 'In Progress', 'Resolved'] &&
+        (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2000000)) &&
+        (!('imageBase64' in data) || (data.imageBase64 is string && data.imageBase64.size() <= 1000000)) &&
+        (!('adminNote' in data) || (data.adminNote is string && data.adminNote.size() <= 1000));
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isSignedIn() &&
+                    request.auth.uid == userId &&
+                    isValidUser(incoming()) &&
+                    (incoming().role == 'citizen' || isAdmin());
+      allow update: if isSignedIn() &&
+                    isOwner(userId) &&
+                    isValidUser(incoming()) &&
+                    incoming().role == existing().role &&
+                    incoming().uid == existing().uid &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['name', 'phone', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+
+    // Service Requests collection
+    match /requests/{requestId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+                    isValidRequest(incoming()) &&
+                    incoming().userId == request.auth.uid &&
+                    incoming().status == 'Pending' &&
+                    !('adminNote' in incoming());
+      allow update: if isSignedIn() && isValidRequest(incoming()) && (
+        // Admin action: can update status, adminNote, updatedAt
+        (isAdmin() &&
+         incoming().userId == existing().userId &&
+         incoming().diff(existing()).affectedKeys().hasOnly(['status', 'adminNote', 'updatedAt'])) ||
+        // Citizen action: can update details only while Pending
+        (isOwner(existing().userId) &&
+         existing().status == 'Pending' &&
+         incoming().userId == existing().userId &&
+         incoming().status == 'Pending' &&
+         incoming().diff(existing()).affectedKeys().hasOnly(['category', 'location', 'description', 'imageUrl', 'imageBase64', 'updatedAt']))
+      );
+      allow delete: if isSignedIn() && (
+        isAdmin() ||
+        (isOwner(existing().userId) && existing().status == 'Pending')
+      );
+    }
+
+    // Admins registry collection
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

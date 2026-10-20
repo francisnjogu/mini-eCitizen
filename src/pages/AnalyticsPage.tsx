@@ -159,7 +159,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ requests }) => {
         </div>
 
         {/* Category Breakdown Table */}
-        <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="lg:col-span-2 p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-1">
             Department Performance By Category
           </h3>

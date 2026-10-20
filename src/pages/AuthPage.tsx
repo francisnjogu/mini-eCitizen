@@ -229,8 +229,18 @@ export const AuthPage: React.FC<AuthPageProps> = ({
       </div>
 
       {/* Main Auth Card */}
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 relative z-10">
-        <div className="bg-white dark:bg-slate-900 py-8 px-6 sm:px-10 shadow-xl rounded-2xl border border-slate-200 dark:border-slate-800">
+      <div className="mt-6 sm:mt-8 w-full max-w-md px-3 sm:px-0 mx-auto relative z-10">
+        <div className="bg-white dark:bg-slate-900 shadow-xl rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden relative">
+          {/* Top side edges to the curved corners colored with the signing button color */}
+          <div
+            className={`h-2.5 sm:h-3 w-full transition-all duration-300 ${
+              isAdminMode
+                ? 'bg-gradient-to-r from-amber-600 to-amber-700'
+                : 'bg-gradient-to-r from-blue-600 to-indigo-600'
+            }`}
+          />
+
+          <div className="py-6 px-4 sm:py-8 sm:px-8">
 
           {/* ============================================================== */}
           {/* ADMINISTRATOR OFFICIAL SIGN IN VIEW                             */}
@@ -363,10 +373,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                     setViewMode('citizen_signin');
                     setErrorMessage(null);
                   }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  className={`flex-1 py-2 sm:py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     viewMode === 'citizen_signin'
-                      ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-900/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   Sign In
@@ -377,10 +387,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                     setViewMode('citizen_signup');
                     setErrorMessage(null);
                   }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  className={`flex-1 py-2 sm:py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     viewMode === 'citizen_signup'
-                      ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-900/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   Create an Account
@@ -527,6 +537,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
               )}
             </div>
           )}
+          </div>
         </div>
       </div>
 
